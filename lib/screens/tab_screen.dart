@@ -31,6 +31,8 @@ class _TabScreen extends ConsumerState<TabScreen> {
   void _showSnackbar(message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
+        dismissDirection: DismissDirection.vertical,
+        duration: const Duration(microseconds: 300),
         content: Text(message),
       ),
     );
@@ -40,15 +42,24 @@ class _TabScreen extends ConsumerState<TabScreen> {
     bool isFavorite = _favoriteList.contains(meal);
     if (isFavorite) {
       setState(() {
+        ScaffoldMessenger.of(context).removeCurrentSnackBar();
         _favoriteList.remove(meal);
       });
       _showSnackbar('not Favorite');
     } else {
       setState(() {
+        ScaffoldMessenger.of(context).removeCurrentSnackBar();
         _favoriteList.add(meal);
       });
       _showSnackbar('Favorite');
     }
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    ScaffoldMessenger.of(context).dispose();
   }
 
   void _setScreen(String screenName) async {
@@ -87,7 +98,7 @@ class _TabScreen extends ConsumerState<TabScreen> {
       // print(favouriteMeals);
       mainContent = Meals(
         mealList: favouriteMeals,
-        ScreenTitle: 'Meals',
+        ScreenTitle: '',
         onSelectFavourite: _onSelectFavourite,
       );
     }

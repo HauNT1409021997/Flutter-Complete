@@ -6,7 +6,7 @@ import 'package:meals_app/widgets/category_item.dart';
 
 import '../models/meal.dart';
 
-class Categories extends StatelessWidget {
+class Categories extends StatefulWidget {
   final void Function(Meal meal) onSelectFavourite;
   final List<Meal> mealList;
   const Categories({
@@ -14,13 +14,44 @@ class Categories extends StatelessWidget {
     super.key,
     required this.onSelectFavourite,
   });
+  @override
+  State<StatefulWidget> createState() {
+    return _Categories();
+  }
+}
+
+class _Categories extends State<Categories>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
   // List<CategoryItem> renderList() {
   //   return mockDataList.map((item) {
   //     return CategoryItem(categoryItem: item);
   //   }).toList();
   // }
 
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+      upperBound: 1,
+      lowerBound: 0,
+    );
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _animationController.dispose();
+  }
+
   void _selectScreen(BuildContext context, CategoryData categoryItem) {
+    final mealList = widget.mealList;
+    final onSelectFavourite = widget.onSelectFavourite;
     final filteredMeals = mealList
         .where((element) => element.categories.contains(categoryItem.id))
         .toList();
@@ -35,33 +66,57 @@ class Categories extends StatelessWidget {
     );
   }
 
+  Widget renderLayout() {
+    return GridView(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 3 / 2,
+        mainAxisSpacing: 20,
+        crossAxisSpacing: 20,
+      ),
+      children: [
+        ...mockDataList.map((item) {
+          return CategoryItem(
+            categoryItem: item,
+            pageNavigation: () {
+              _selectScreen(context, item);
+            },
+          );
+        }),
+        // for (var item in mockDataList) CategoryItem(categoryItem: item),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return Scaffold(
-      body: Container(
-        margin: const EdgeInsets.only(top: 20),
-        padding: const EdgeInsets.all(5),
-        child: GridView(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 3 / 2,
-            mainAxisSpacing: 20,
-            crossAxisSpacing: 20,
-          ),
-          children: [
-            ...mockDataList.map((item) {
-              return CategoryItem(
-                categoryItem: item,
-                pageNavigation: () {
-                  _selectScreen(context, item);
-                },
-              );
-            }),
-            // for (var item in mockDataList) CategoryItem(categoryItem: item),
-          ],
-        ),
+        body: Container(
+      margin: const EdgeInsets.only(top: 20),
+      padding: const EdgeInsets.all(5),
+      child: AnimatedBuilder(
+        animation: _animationController,
+        // builder: (context, child) => Padding(
+        //   padding: EdgeInsets.only(
+        //     top: 100 - _animationController.value * 100,
+        //   ),
+        //   child: child,
+        // ),
+        builder: (context, child) {
+          return SlideTransition(
+            position: Tween(
+              begin: const Offset(0, 20),
+              end: const Offset(0, 0),
+            ).animate(
+              CurvedAnimation(
+                  parent: _animationController, curve: Curves.easeInOut),
+            ),
+            child: child,
+          );
+        },
+        child: renderLayout(),
       ),
-    );
+    ));
   }
 }

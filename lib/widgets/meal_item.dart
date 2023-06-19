@@ -46,9 +46,12 @@ class MealItem extends StatelessWidget {
         onTap: () => _transistToMealDetail(context, mealItem),
         child: Stack(
           children: [
-            FadeInImage(
-              placeholder: MemoryImage(kTransparentImage),
-              image: NetworkImage(mealItem.imageUrl),
+            Hero(
+              tag: mealItem.id,
+              child: FadeInImage(
+                placeholder: MemoryImage(kTransparentImage),
+                image: NetworkImage(mealItem.imageUrl),
+              ),
             ),
             Positioned(
               bottom: 0,
